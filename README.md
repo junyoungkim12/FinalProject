@@ -17,6 +17,8 @@
 ### 프로젝트 진행 기간: 2024.06 ~ 2024.08
 
 <br>
+## ERD
+![erd](/images/ERD.jpg)
 
 ## 기술 스택
 ![기술 스택](/images/기술.jpg)
@@ -82,7 +84,7 @@
 
 ### 배포 URL
 
-[이디핏 웹사이트](www.eadyfit.com/)
+[이디핏 웹사이트](http://www.eadyfit.com/)
 
 ### 로컬에서 실행하려고 할 때
 
