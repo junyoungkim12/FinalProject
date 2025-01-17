@@ -30,6 +30,8 @@
 ## ERD
 ![erd](/images/ERD.jpg)
 
+<a href="https://comely15.notion.site/API-cf7b6bd22929401080707986145b3fd6">Notion 링크</a>
+
 ## 기술 스택
 ![기술 스택](/images/기술.jpg)
 
