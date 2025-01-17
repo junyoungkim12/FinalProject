@@ -68,8 +68,9 @@
 ## 기능 명세서
 
 ![기능명세서](/images/기능명세서.jpg)
-<a href="https://comely15.notion.site/f6430680d67a47ed8266a7483d945258">Notion 링크</a>
+
 <br>
+<a href="https://comely15.notion.site/f6430680d67a47ed8266a7483d945258">Notion 링크</a>
 
 ## 나의 역할
 
