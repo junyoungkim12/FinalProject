@@ -76,6 +76,8 @@
 
 ## 나의 역할
 <img src="https://github.com/user-attachments/assets/cc477143-9156-4e8e-9041-904e0c183125" width="600"/>
+<img src="https://github.com/user-attachments/assets/5ec9aae4-7f73-49b3-9f12-6aa90d91eb06" width="600"/>
+
 
 
 - 저는 백엔드 개발자로서 **운동 기록 관리**와 **식단 기록 관리** 기능을 개발했습니다.
