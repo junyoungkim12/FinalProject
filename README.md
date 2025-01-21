@@ -75,7 +75,7 @@
 <a href="https://comely15.notion.site/f6430680d67a47ed8266a7483d945258">Notion 링크</a>
 
 ## 기능 명세서
-![API 문서](/images/구름 방범대 api 문서.jpg)
+![API 문서](/images/구름방범대api문서.jpg)
 <br>
 <a href="https://comely15.notion.site/API-cf7b6bd22929401080707986145b3fd6">Notion 링크</a>
 
