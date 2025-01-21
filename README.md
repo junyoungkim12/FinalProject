@@ -74,6 +74,11 @@
 <br>
 <a href="https://comely15.notion.site/f6430680d67a47ed8266a7483d945258">Notion 링크</a>
 
+## 기능 명세서
+![API 문서](/images/구름 방범대 api 문서.jpg)
+<br>
+<a href="https://comely15.notion.site/API-cf7b6bd22929401080707986145b3fd6">Notion 링크</a>
+
 ## 나의 역할
 <img src="https://github.com/user-attachments/assets/cc477143-9156-4e8e-9041-904e0c183125" width="600"/>
 <img src="https://github.com/user-attachments/assets/5ec9aae4-7f73-49b3-9f12-6aa90d91eb06" width="600"/>
