@@ -1,6 +1,7 @@
 package backend.goorm.diet.dto;
 
 import backend.goorm.diet.entity.Diet;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
+@AllArgsConstructor
 public class DietResponseDto {
     private Long dietId;
     private String mealTime;

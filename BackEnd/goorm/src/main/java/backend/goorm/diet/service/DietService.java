@@ -70,6 +70,20 @@ public class DietService {
 
         return responses;
     }
+    public void updateDietEntity(Diet diet, DietUpdateRequestDto dto, FoodRepository foodRepository) {
+        diet.setDietDate(dto.getDietDate());
+        diet.setMealTime(MealTime.valueOf(dto.getMealTime().toUpperCase()));
+
+        if (dto.getFoodQuantities() != null && !dto.getFoodQuantities().isEmpty()) {
+            DietUpdateRequestDto.FoodQuantity fq = dto.getFoodQuantities().get(0);
+            Food food = foodRepository.findById(fq.getFoodId())
+                    .orElseThrow(() -> new IllegalArgumentException("Food not found with id: " + fq.getFoodId()));
+            diet.setFood(food);
+            diet.setQuantity(fq.getQuantity());
+        }
+        // memo 등 필요한 추가 변경도 여기서 처리
+    }
+
 
     @Transactional
     public List<DietResponseDto> editDietsAndMemos(List<DietUpdateRequestDto> requests, Member member) {

@@ -9,7 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
-@Setter
 @ToString
 public class DietCreateRequestDto {
     private LocalDate dietDate;
