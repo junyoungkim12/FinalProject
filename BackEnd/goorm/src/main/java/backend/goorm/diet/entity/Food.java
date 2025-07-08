@@ -3,15 +3,15 @@ package backend.goorm.diet.entity;
 import backend.goorm.member.model.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
+import java.util.ArrayList;
+
 
 @Getter
-@Setter
-@Entity
-@Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
+@Entity
 @Table(name = "food")
 public class Food {
 
@@ -47,14 +47,19 @@ public class Food {
     private Float saturatedFat;
     private Float transFat;
 
-
     @Column(name = "user_register", nullable = false)
     private Boolean userRegister = false;
-
 
     @Column(name = "use_count", nullable = false)
     private Integer useCount = 0;
 
     @OneToMany(mappedBy = "food")
-    private List<Diet> diets;
+    @Builder.Default
+    private List<Diet> diets = new ArrayList<>();
+
+    // 도메인 메서드: 사용 카운트 증가
+    public void increaseUseCount() {
+        this.useCount++;
+    }
+
 }
