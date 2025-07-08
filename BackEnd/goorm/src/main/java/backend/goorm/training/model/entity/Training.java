@@ -20,13 +20,16 @@ public class Training {
     @Column(name = "training_id")
     private Long trainingId;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private TrainingCategory category;
 
+    @Setter
     @Column(name = "training_name", nullable = false)
     private String trainingName;
 
+    @Setter
     @Column(name = "user_register", nullable = false)
     private Boolean userCustom = false;
 
