@@ -69,6 +69,20 @@ public class FoodService {
         return FoodResponseDto.fromEntity(food);
     }
 
+    public void updateFoodEntity(Food food, FoodUpdateRequestDto dto) {
+        food.setFoodName(dto.getFoodName());
+        food.setCalories(dto.getCalories());
+        food.setCarbohydrate(dto.getCarbohydrate());
+        food.setProtein(dto.getProtein());
+        food.setFat(dto.getFat());
+        food.setSugar(dto.getSugar());
+        food.setSalt(dto.getSalt());
+        food.setCholesterol(dto.getCholesterol());
+        food.setSaturatedFat(dto.getSaturatedFat());
+        food.setTransFat(dto.getTransFat());
+    }
+
+
     public FoodResponseDto updateFood(Long memberId, Long foodId, FoodUpdateRequestDto dto) {
 
         Food food = foodRepository.findById(foodId)

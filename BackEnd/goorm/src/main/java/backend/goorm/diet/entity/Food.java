@@ -20,31 +20,47 @@ public class Food {
     @Column(name = "food_id")
     private Long foodId;
 
+    @Setter
     @Column(name = "food_name", nullable = false)
     private String foodName;
 
+    @Setter
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Setter
     private Float gram;
 
+    @Setter
     @Column(name = "calories")
     private Float calories;
 
+    @Setter
     @Column(name = "carbohydrate")
     private Float carbohydrate;
 
+    @Setter
     @Column(name = "protein")
     private Float protein;
 
+    @Setter
     @Column(name = "fat")
     private Float fat;
 
+    @Setter
     private Float sugar;
+
+    @Setter
     private Float salt;
+
+    @Setter
     private Float cholesterol;
+
+    @Setter
     private Float saturatedFat;
+
+    @Setter
     private Float transFat;
 
     @Column(name = "user_register", nullable = false)
