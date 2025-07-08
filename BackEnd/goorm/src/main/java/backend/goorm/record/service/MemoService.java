@@ -20,11 +20,11 @@ public class MemoService {
     private final RecordRepository recordRepository;
 
     public MemoDto addOrUpdateMemo(MemoDto memoDto, Member member) {
-        LocalDate date = memoDto.getDate(); // 입력받은 날짜로 메모 관리
+        LocalDate date = memoDto.getDate();
         List<Record> records = recordRepository.findAllByExerciseDateAndMember(date, member);
 
         Memo memo = memoRepository.findByMemberAndDate(member, date)
-                .orElse(new Memo());
+                .orElseGet(() -> Memo.builder().member(member).date(date).build());
 
         memo.setMember(member);
         memo.setDate(date);
@@ -33,13 +33,15 @@ public class MemoService {
 
         memoRepository.save(memo);
 
+        // Optional: log.info("메모 저장: member={}, date={}", member.getMemberId(), date);
+
         return MemoDto.fromEntity(memo);
     }
 
     public MemoDto getMemoByDateAndMember(LocalDate date, Member member) {
         Memo memo = memoRepository.findByMemberAndDate(member, date)
                 .orElseThrow(() -> new IllegalArgumentException("해당 날짜의 메모를 찾지 못했습니다: " + date));
-
         return MemoDto.fromEntity(memo);
     }
 }
+
