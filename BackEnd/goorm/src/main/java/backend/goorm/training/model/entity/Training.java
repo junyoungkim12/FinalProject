@@ -2,18 +2,16 @@ package backend.goorm.training.model.entity;
 
 import backend.goorm.member.model.entity.Member;
 import backend.goorm.record.entity.Record;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "training")
 public class Training {
 
@@ -22,7 +20,7 @@ public class Training {
     @Column(name = "training_id")
     private Long trainingId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private TrainingCategory category;
 
@@ -42,7 +40,19 @@ public class Training {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @OneToMany(mappedBy = "training")
-    @JsonIgnore
-    private List<Record> trainingRecords;
+    @OneToMany(mappedBy = "training", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Record> trainingRecords = new ArrayList<>();
+
+    @Builder
+    public Training(TrainingCategory category, String trainingName, Boolean userCustom, Member member,
+                    Float caloriesBurnedPerMinute, String imageUrl) {
+        this.category = category;
+        this.trainingName = trainingName;
+        this.userCustom = userCustom;
+        this.member = member;
+        this.caloriesBurnedPerMinute = caloriesBurnedPerMinute;
+        this.imageUrl = imageUrl;
+    }
+
+
 }
