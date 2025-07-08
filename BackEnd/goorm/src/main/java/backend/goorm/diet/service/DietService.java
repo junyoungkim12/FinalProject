@@ -36,15 +36,16 @@ public class DietService {
     public List<DietResponseDto> getAllDiets(Member member) {
         List<Diet> diets = dietRepository.findByMember(member);
 
+        // Diet 별로 메모 조회 (N+1 위험, 대량 데이터시 fetch join 등으로 개선 가능)
         return diets.stream()
                 .map(diet -> {
-                    Optional<DietMemo> dietMemoOptional = dietMemoRepository.findByMemberAndDate(member, diet.getDietDate());
-                    String dietMemoContent = dietMemoOptional.map(DietMemo::getContent).orElse(null);
-                    return DietResponseDto.fromEntityWithMemo(diet, dietMemoContent);
+                    String memoContent = getDietMemo(member, diet.getDietDate());
+                    return DietResponseDto.fromEntityWithMemo(diet, memoContent);
                 })
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<DietResponseDto> createDiet(DietCreateRequestDto dto, Member member) {
         List<DietResponseDto> responses = dto.getFoodQuantities().stream().map(foodQuantity -> {
             Food food = foodRepository.findById(foodQuantity.getFoodId())
@@ -59,31 +60,15 @@ public class DietService {
                     .member(member)
                     .build();
 
-            // 총 칼로리, 총 그램 계산 및 저장
             diet.calculateTotalCaloriesAndGram();
 
             Diet savedDiet = dietRepository.save(diet);
-
 
             return DietResponseDto.fromEntity(savedDiet);
         }).collect(Collectors.toList());
 
         return responses;
     }
-    public void updateDietEntity(Diet diet, DietUpdateRequestDto dto, FoodRepository foodRepository) {
-        diet.setDietDate(dto.getDietDate());
-        diet.setMealTime(MealTime.valueOf(dto.getMealTime().toUpperCase()));
-
-        if (dto.getFoodQuantities() != null && !dto.getFoodQuantities().isEmpty()) {
-            DietUpdateRequestDto.FoodQuantity fq = dto.getFoodQuantities().get(0);
-            Food food = foodRepository.findById(fq.getFoodId())
-                    .orElseThrow(() -> new IllegalArgumentException("Food not found with id: " + fq.getFoodId()));
-            diet.setFood(food);
-            diet.setQuantity(fq.getQuantity());
-        }
-        // memo 등 필요한 추가 변경도 여기서 처리
-    }
-
 
     @Transactional
     public List<DietResponseDto> editDietsAndMemos(List<DietUpdateRequestDto> requests, Member member) {
@@ -95,16 +80,14 @@ public class DietService {
             Diet diet = dietRepository.findById(request.getDietId())
                     .orElseThrow(() -> new IllegalArgumentException("Diet not found with id: " + request.getDietId()));
 
-            // 권한 확인
             if (!diet.getMember().getMemberId().equals(member.getMemberId())) {
                 throw new IllegalArgumentException("You do not have permission to edit this diet.");
             }
 
-            // 식단 정보 업데이트
-            request.updateEntity(diet, foodRepository);
+            updateDietEntity(diet, request);
+
             Diet saved = dietRepository.save(diet);
 
-            // 메모 정보를 업데이트하기 위해 날짜와 메모 내용을 저장
             if (memoDate == null) {
                 memoDate = request.getDietDate();
             }
@@ -113,16 +96,14 @@ public class DietService {
             }
         }
 
-        // 메모가 있을 경우에만 메모 업데이트 또는 생성
         if (memoDate != null && memoContent != null) {
             Optional<DietMemo> existingMemoOpt = dietMemoRepository.findByMemberAndDate(member, memoDate);
 
             if (existingMemoOpt.isPresent()) {
                 DietMemo existingMemo = existingMemoOpt.get();
-                existingMemo.setContent(memoContent); // 기존 메모 업데이트
+                existingMemo.setContent(memoContent);
                 dietMemoRepository.save(existingMemo);
             } else {
-                // 새로운 메모 생성
                 DietMemo newMemo = DietMemo.builder()
                         .member(member)
                         .content(memoContent)
@@ -132,14 +113,12 @@ public class DietService {
             }
         }
 
-        // 수정된 식단에 대한 응답 생성
+        // 응답 생성 (변경된 Diet 리스트 변환)
         for (DietUpdateRequestDto request : requests) {
             Diet diet = dietRepository.findById(request.getDietId())
                     .orElseThrow(() -> new IllegalArgumentException("Diet not found with id: " + request.getDietId()));
 
-            String memoContentForDto = dietMemoRepository.findByMemberAndDate(member, diet.getDietDate())
-                    .map(DietMemo::getContent)
-                    .orElse(null);
+            String memoContentForDto = getDietMemo(member, diet.getDietDate());
 
             updatedDiets.add(DietResponseDto.fromEntity(diet, memoContentForDto));
         }
@@ -147,15 +126,27 @@ public class DietService {
         return updatedDiets;
     }
 
+    // 엔티티 업데이트 로직(서비스 계층에서 담당)
+    private void updateDietEntity(Diet diet, DietUpdateRequestDto dto) {
+        diet.setDietDate(dto.getDietDate());
+        diet.setMealTime(MealTime.valueOf(dto.getMealTime().toUpperCase()));
 
+        if (dto.getFoodQuantities() != null && !dto.getFoodQuantities().isEmpty()) {
+            DietUpdateRequestDto.FoodQuantity fq = dto.getFoodQuantities().get(0);
+            Food food = foodRepository.findById(fq.getFoodId())
+                    .orElseThrow(() -> new IllegalArgumentException("Food not found with id: " + fq.getFoodId()));
+            diet.setFood(food);
+            diet.setQuantity(fq.getQuantity());
+            diet.setGram(fq.getGram());
+        }
+        // memo 등 필요한 추가 변경도 여기서 처리
+    }
 
-
-
+    @Transactional
     public boolean deleteDiet(Long dietId, Member member) {
         Diet diet = dietRepository.findById(dietId)
                 .orElseThrow(() -> new IllegalArgumentException("Diet not found with id: " + dietId));
 
-        // 권한 검사: 현재 로그인한 사용자가 해당 다이어트 항목을 삭제할 수 있는지 확인
         if (!diet.getMember().getMemberId().equals(member.getMemberId())) {
             throw new IllegalArgumentException("You do not have permission to delete this diet.");
         }
@@ -164,6 +155,7 @@ public class DietService {
         return true;
     }
 
+    @Transactional
     public DietMemoDto addOrUpdateDietMemo(DietMemoDto memoDto, Member member) {
         Optional<DietMemo> existingMemoOpt = dietMemoRepository.findByMemberAndDate(member, memoDto.getDate());
 
@@ -183,7 +175,6 @@ public class DietService {
         return DietMemoDto.fromEntity(savedMemo);
     }
 
-
     public String getDietMemo(Member member, LocalDate date) {
         return dietMemoRepository.findByMemberAndDate(member, date)
                 .map(DietMemo::getContent)
@@ -198,22 +189,20 @@ public class DietService {
         double totalProtein = 0.0;
         double totalFat = 0.0;
 
-        // 식단 기록 가져오기
         List<Diet> diets = dietRepository.findByDietDateAndMember(date, member);
 
         for (Diet diet : diets) {
-            double carbs = diet.getFood().getCarbohydrate();
-            double protein = diet.getFood().getProtein();
-            double fat = diet.getFood().getFat();
-            double calories = diet.getTotalCalories();
+            double carbs = Optional.ofNullable(diet.getFood().getCarbohydrate()).orElse(0.0f);
+            double protein = Optional.ofNullable(diet.getFood().getProtein()).orElse(0.0f);
+            double fat = Optional.ofNullable(diet.getFood().getFat()).orElse(0.0f);
+            double calories = Optional.ofNullable(diet.getTotalCalories()).orElse(0.0f);
 
-            // 총 영양소와 칼로리 누적
             totalCarbs += carbs;
             totalProtein += protein;
             totalFat += fat;
             totalCaloriesForDay += calories;
 
-            NutrientPercentage nutrientPercentage = macroPercentages.computeIfAbsent(diet.getMealTime().toString(), k -> new NutrientPercentage());
+            NutrientPercentage nutrientPercentage = macroPercentages.computeIfAbsent(diet.getMealTime().toString(), k -> NutrientPercentage.builder().build());
 
             nutrientPercentage.setCarbsPercentage(nutrientPercentage.getCarbsPercentage() + carbs);
             nutrientPercentage.setProteinPercentage(nutrientPercentage.getProteinPercentage() + protein);
@@ -221,21 +210,31 @@ public class DietService {
             nutrientPercentage.setTotalCalories(nutrientPercentage.getTotalCalories() + calories);
         }
 
-        // 각 식사별 비율 계산
         macroPercentages.forEach((mealTime, nutrient) -> {
             double totalNutrients = nutrient.getCarbsPercentage() + nutrient.getProteinPercentage() + nutrient.getFatPercentage();
-            nutrient.setCarbsPercentage((int) Math.round((nutrient.getCarbsPercentage() / totalNutrients) * 100));
-            nutrient.setProteinPercentage((int) Math.round((nutrient.getProteinPercentage() / totalNutrients) * 100));
-            nutrient.setFatPercentage((int) Math.round((nutrient.getFatPercentage() / totalNutrients) * 100));
+            if (totalNutrients > 0) {
+                nutrient.setCarbsPercentage((int) Math.round((nutrient.getCarbsPercentage() / totalNutrients) * 100));
+                nutrient.setProteinPercentage((int) Math.round((nutrient.getProteinPercentage() / totalNutrients) * 100));
+                nutrient.setFatPercentage((int) Math.round((nutrient.getFatPercentage() / totalNutrients) * 100));
+            } else {
+                nutrient.setCarbsPercentage(0);
+                nutrient.setProteinPercentage(0);
+                nutrient.setFatPercentage(0);
+            }
         });
 
-        // 전체 비율 계산
         double totalNutrients = totalCarbs + totalProtein + totalFat;
 
-        NutrientPercentage totalNutrientPercentage = new NutrientPercentage();
-        totalNutrientPercentage.setCarbsPercentage((int) Math.round((totalCarbs / totalNutrients) * 100));
-        totalNutrientPercentage.setProteinPercentage((int) Math.round((totalProtein / totalNutrients) * 100));
-        totalNutrientPercentage.setFatPercentage((int) Math.round((totalFat / totalNutrients) * 100));
+        NutrientPercentage totalNutrientPercentage = NutrientPercentage.builder().build();
+        if (totalNutrients > 0) {
+            totalNutrientPercentage.setCarbsPercentage((int) Math.round((totalCarbs / totalNutrients) * 100));
+            totalNutrientPercentage.setProteinPercentage((int) Math.round((totalProtein / totalNutrients) * 100));
+            totalNutrientPercentage.setFatPercentage((int) Math.round((totalFat / totalNutrients) * 100));
+        } else {
+            totalNutrientPercentage.setCarbsPercentage(0);
+            totalNutrientPercentage.setProteinPercentage(0);
+            totalNutrientPercentage.setFatPercentage(0);
+        }
         totalNutrientPercentage.setTotalCalories(totalCaloriesForDay);
 
         macroPercentages.put("TOTAL", totalNutrientPercentage);

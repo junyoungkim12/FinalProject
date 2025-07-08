@@ -32,6 +32,7 @@ public class DietMemo {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
+    @Setter
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
