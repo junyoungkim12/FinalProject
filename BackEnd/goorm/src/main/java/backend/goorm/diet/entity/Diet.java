@@ -11,8 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Entity
@@ -33,26 +32,33 @@ public class Diet {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memo_id")
     private DietMemo dietMemo;
 
+    @Setter
     @Column(name = "quantity")
     private Float quantity;
 
+    @Setter
     @Column(name = "gram")
     private Float gram;
 
+    @Setter
     @Column(name = "total_calories")
     private Float totalCalories;
 
+    @Setter
     @Column(name = "total_gram")
     private Float totalGram;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "meal_time", nullable = false)
     private MealTime mealTime;
 
+    @Setter
     @Column(name = "diet_date", nullable = false)
     private LocalDate dietDate;
 
@@ -60,17 +66,26 @@ public class Diet {
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    // 총 칼로리를 계산하고 설정하는 메서드
+    /**
+     * 총 칼로리, 그램 계산 메서드 (null-safe)
+     */
     public void calculateTotalCaloriesAndGram() {
+        if (food == null) {
+            this.totalCalories = 0.0f;
+            this.totalGram = 0.0f;
+            return;
+        }
         if (gram != null && gram > 0) {
             this.totalCalories = food.getCalories() / food.getGram() * gram;
-            this.totalGram = gram;  // 사용자가 gram을 직접 입력한 경우
+            this.totalGram = gram;
         } else if (quantity != null && quantity > 0) {
             this.totalCalories = food.getCalories() * quantity;
-            this.totalGram = quantity * food.getGram();  // 사용자가 quantity를 입력한 경우
+            this.totalGram = quantity * food.getGram();
         } else {
             this.totalCalories = 0.0f;
             this.totalGram = 0.0f;
         }
     }
+
 }
+
