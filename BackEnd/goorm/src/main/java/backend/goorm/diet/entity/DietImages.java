@@ -3,11 +3,13 @@ package backend.goorm.diet.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+import jakarta.persistence.*;
+import lombok.*;
+
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "diet_images")
 public class DietImages {
@@ -24,8 +26,5 @@ public class DietImages {
     @Column(name = "image_url")
     private String imageUrl;
 
-    public DietImages(Diet diet, String imageUrl) {
-        this.diet = diet;
-        this.imageUrl = imageUrl;
-    }
 }
+
