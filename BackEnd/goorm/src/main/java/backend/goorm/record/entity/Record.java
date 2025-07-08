@@ -31,37 +31,48 @@ public class Record {
     @Column(name = "record_date", nullable = false)
     private LocalDateTime recordDate;
 
+    @Setter
     @Column(name = "exercise_date", nullable = false)
     private LocalDate exerciseDate;
 
+    @Setter
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
 
+    @Setter
     @Column(name = "calories_burned", nullable = false)
     private Float caloriesBurned;
 
+    @Setter
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
 
+    @Setter
     @Column(name = "intensity")
     private String intensity;
 
+    @Setter
     @Column(name = "sets")
     private Integer sets;
 
+    @Setter
     @Column(name = "reps")
     private Integer reps;
 
+    @Setter
     @Column(name = "weight")
     private Integer weight;
 
+    @Setter
     @Column(name = "distance")
     private Float distance;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memo_id")
     private Memo memo;
 
+    @Setter
     @Column(name = "satisfaction")
     private Integer satisfaction;
 
@@ -83,13 +94,10 @@ public class Record {
         this.satisfaction = satisfaction;
     }
 
-    public void setMemo(Memo memo) {
-        this.memo = memo;
-    }
-
     @PreUpdate
     protected void onUpdate() {
         this.modifiedDate = LocalDateTime.now();
     }
 }
+
 
