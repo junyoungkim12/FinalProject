@@ -8,12 +8,12 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 @Entity
 public class WeeklyRecord {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,20 +24,34 @@ public class WeeklyRecord {
 
     private int trainingPerWeek;
 
+    @Setter
     private LocalDate startDate;
+    @Setter
     private LocalDate endDate;
 
     // 주간 body part count 기록
+    @Setter
     private double cardio;
+    @Setter
     private double chest;
+    @Setter
     private double back;
+    @Setter
     private double legs;
+    @Setter
     private double shoulder;
+    @Setter
     private double biceps;
+    @Setter
     private double triceps;
+    @Setter
     private double abs;
+    @Setter
     private double etc;
 
+    /**
+     * 카테고리별로 해당 부위 카운트 누적
+     */
     public void addCountValues(TrainingCategoryType category, double value) {
         switch (category) {
             case 유산소:
@@ -70,3 +84,4 @@ public class WeeklyRecord {
         }
     }
 }
+

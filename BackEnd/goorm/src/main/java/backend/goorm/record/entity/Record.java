@@ -4,18 +4,12 @@ import backend.goorm.member.model.entity.Member;
 import backend.goorm.training.model.entity.Training;
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import java.time.LocalDateTime;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-@Builder
+
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "record")
 public class Record {
@@ -25,10 +19,11 @@ public class Record {
     @Column(name = "record_id")
     private Long recordId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "training_id", nullable = false)
     private Training training;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -70,8 +65,31 @@ public class Record {
     @Column(name = "satisfaction")
     private Integer satisfaction;
 
+    @Builder
+    public Record(Training training, Member member, LocalDateTime recordDate, LocalDate exerciseDate,
+                  Float caloriesBurned, Integer durationMinutes, String intensity,
+                  Integer sets, Integer reps, Integer weight, Float distance, Integer satisfaction) {
+        this.training = training;
+        this.member = member;
+        this.recordDate = recordDate;
+        this.exerciseDate = exerciseDate;
+        this.caloriesBurned = caloriesBurned;
+        this.durationMinutes = durationMinutes;
+        this.intensity = intensity;
+        this.sets = sets;
+        this.reps = reps;
+        this.weight = weight;
+        this.distance = distance;
+        this.satisfaction = satisfaction;
+    }
+
+    public void setMemo(Memo memo) {
+        this.memo = memo;
+    }
+
     @PreUpdate
     protected void onUpdate() {
         this.modifiedDate = LocalDateTime.now();
     }
 }
+

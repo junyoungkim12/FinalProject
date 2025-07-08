@@ -7,9 +7,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class BodyPartCountRecord {
 
@@ -39,8 +37,26 @@ public class BodyPartCountRecord {
     private double etc;
 
     @Builder
-    public BodyPartCountRecord(double chest, double back, double legs, double shoulder, double biceps,
+    public BodyPartCountRecord(TrainingRecord trainingRecord, Member member, LocalDate date, boolean weeklyRecordedYn,
+                               double chest, double back, double legs, double shoulder, double biceps,
                                double triceps, double abs, double etc) {
+        this.trainingRecord = trainingRecord;
+        this.member = member;
+        this.date = date;
+        this.weeklyRecordedYn = weeklyRecordedYn;
+        this.chest = chest;
+        this.back = back;
+        this.legs = legs;
+        this.shoulder = shoulder;
+        this.biceps = biceps;
+        this.triceps = triceps;
+        this.abs = abs;
+        this.etc = etc;
+    }
+
+    // 업데이트 명확화: 상태 변경 메서드로 관리
+    public void update(double chest, double back, double legs, double shoulder, double biceps,
+                       double triceps, double abs, double etc) {
         this.chest = chest;
         this.back = back;
         this.legs = legs;
@@ -55,13 +71,14 @@ public class BodyPartCountRecord {
     public String toString() {
         return "BodyPartCountRecord{" +
                 "id=" + id +
-                "date=" + date +
+                ", date=" + date +
                 ", chest=" + chest +
                 ", back=" + back +
                 ", legs=" + legs +
                 ", shoulder=" + shoulder +
                 ", biceps=" + biceps +
                 ", triceps=" + triceps +
+                ", abs=" + abs +
                 ", etc=" + etc +
                 '}';
     }
