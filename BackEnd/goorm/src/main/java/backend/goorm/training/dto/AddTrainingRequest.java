@@ -6,16 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
 public class AddTrainingRequest {
-    private String name;
-    private TrainingCategory category; // 여기에서 TrainingCategory 전체를 받도록 수정
+    private final String name;
+    private final Long categoryId;
 
-    public static Training toEntity(AddTrainingRequest request, TrainingCategory category) {
-        Training training = new Training();
-        training.setTrainingName(request.getName());
-        training.setCategory(category);
-        training.setUserCustom(true);
-        return training;
+    public AddTrainingRequest(String name, Long categoryId) {
+        this.name = name;
+        this.categoryId = categoryId;
+    }
+
+    public Training toEntity(TrainingCategory category) {
+        return Training.builder()
+                .trainingName(name)
+                .category(category)
+                .userCustom(true)
+                .build();
     }
 }
+

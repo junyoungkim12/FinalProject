@@ -5,25 +5,32 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
 public class TrainingDto {
-    private Long id;
-    private String name;
-    private String categoryName;
-    private Long categoryId;
+    private final Long id;
+    private final String name;
+    private final String categoryName;
+    private final Long categoryId;
+
+    private TrainingDto(Long id, String name, String categoryName, Long categoryId) {
+        this.id = id;
+        this.name = name;
+        this.categoryName = categoryName;
+        this.categoryId = categoryId;
+    }
 
     public static TrainingDto fromEntity(Training training) {
-        TrainingDto dto = new TrainingDto();
-        dto.setId(training.getTrainingId());
-        dto.setName(training.getTrainingName());
-        dto.setCategoryId(training.getCategory().getCategoryId());
-        if (training.getCategory() != null) {
-            dto.setCategoryName(training.getCategory().getCategoryName().name());
-        } else {
-            dto.setCategoryName("Unknown"); // 또는 기본 값을 설정
-        }
-        return dto;
+        String categoryName = training.getCategory() != null ?
+                training.getCategory().getCategoryName().name() : "Unknown";
+        Long categoryId = training.getCategory() != null ?
+                training.getCategory().getCategoryId() : null;
+        return new TrainingDto(
+                training.getTrainingId(),
+                training.getTrainingName(),
+                categoryName,
+                categoryId
+        );
     }
 }
+
 
 
