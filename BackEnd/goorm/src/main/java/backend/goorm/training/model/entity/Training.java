@@ -58,4 +58,9 @@ public class Training {
     }
 
 
+    public void updateTraining(String trainingName, TrainingCategory category) {
+        this.trainingName = trainingName;
+        this.category = category;
+    }
+
 }

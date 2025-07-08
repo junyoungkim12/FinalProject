@@ -10,9 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,27 +19,24 @@ public class BasicTrainingService {
     private final TrainingRepository trainingRepository;
     private final TrainingCategoryRepository trainingCategoryRepository;
 
-    public TrainingDto addBasicTraining(AddTrainingRequest input) {
-        Long categoryId = input.getCategory().getCategoryId();
-        Optional<TrainingCategory> optionalCategory = trainingCategoryRepository.findById(categoryId);
+    public TrainingDto addBasicTraining(AddTrainingRequest request) {
+        Long categoryId = request.getCategoryId();
 
-        if (!optionalCategory.isPresent()) {
-            throw new IllegalArgumentException("카테고리 ID가 존재하지 않습니다.");
-        }
+        // 카테고리 존재 여부만 검증
+        TrainingCategory category = trainingCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> {
+                    log.warn("카테고리 ID({})가 존재하지 않음", categoryId);
+                    return new IllegalArgumentException("카테고리 ID가 존재하지 않습니다.");
+                });
 
-        TrainingCategory category = optionalCategory.get();
-        if (!category.getCategoryName().equals(input.getCategory().getCategoryName())) {
-            throw new IllegalArgumentException("카테고리 ID와 이름이 일치하지 않습니다.");
-        }
+        Training training = Training.builder()
+                .trainingName(request.getName())
+                .category(category)
+                .userCustom(false)
+                .build();
 
-        Training training = AddTrainingRequest.toEntity(input, category);
-        training.setUserCustom(false); // 기본 운동이므로 userCustom을 false로 설정
         Training saved = trainingRepository.save(training);
+        log.info("기본 운동 등록 완료: {}", saved.getTrainingName());
         return TrainingDto.fromEntity(saved);
-    }
-
-    public List<TrainingDto> getAllTrainings() {
-        List<Training> trainings = trainingRepository.findAll();
-        return trainings.stream().map(TrainingDto::fromEntity).collect(Collectors.toList());
     }
 }
