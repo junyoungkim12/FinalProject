@@ -2,15 +2,15 @@ package backend.goorm.training.model.entity;
 
 import backend.goorm.training.model.enums.TrainingCategoryType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "training_category")
 public class TrainingCategory {
 
@@ -23,7 +23,14 @@ public class TrainingCategory {
     @Column(name = "category_name", nullable = false)
     private TrainingCategoryType categoryName;
 
-    @OneToMany(mappedBy = "category")
-    @JsonIgnore
-    private List<Training> trainings;
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Training> trainings = new ArrayList<>();
+
+    @Builder
+    public TrainingCategory(TrainingCategoryType categoryName) {
+        this.categoryName = categoryName;
+    }
+
+
 }
+
