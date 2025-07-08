@@ -92,7 +92,17 @@ public class FoodService {
             throw new IllegalArgumentException("You do not have permission to update this food item.");
         }
 
-        dto.updateEntity(food);
+        // 엔티티 변경은 서비스 계층에서 처리
+        food.setFoodName(dto.getFoodName());
+        food.setCalories(dto.getCalories());
+        food.setCarbohydrate(dto.getCarbohydrate());
+        food.setProtein(dto.getProtein());
+        food.setFat(dto.getFat());
+        food.setSugar(dto.getSugar());
+        food.setSalt(dto.getSalt());
+        food.setCholesterol(dto.getCholesterol());
+        food.setSaturatedFat(dto.getSaturatedFat());
+        food.setTransFat(dto.getTransFat());
         foodRepository.save(food);
         return FoodResponseDto.fromEntity(food);
     }
