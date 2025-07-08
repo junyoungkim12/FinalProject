@@ -1,10 +1,11 @@
 package backend.goorm.record.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BodyPartCountDto {
     private double cardio;
     private double chest;
