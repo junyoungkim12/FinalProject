@@ -24,9 +24,11 @@ public class Diet {
     @Column(name = "diet_id")
     private Long dietId;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "food_id")
     private Food food;
+
 
     @ManyToOne
     @JoinColumn(name = "member_id")
