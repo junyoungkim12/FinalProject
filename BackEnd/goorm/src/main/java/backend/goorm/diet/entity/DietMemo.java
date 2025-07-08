@@ -2,15 +2,14 @@ package backend.goorm.diet.entity;
 
 import backend.goorm.member.model.entity.Member;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
+
 
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Entity
@@ -27,8 +26,8 @@ public class DietMemo {
     private Member member;
 
     @OneToMany(mappedBy = "dietMemo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Diet> diets;
-
+    @Builder.Default
+    private List<Diet> diets = new ArrayList<>();
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
@@ -36,5 +35,10 @@ public class DietMemo {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-
+    // 도메인 메서드 (연관관계 관리)
+    public void addDiet(Diet diet) {
+        this.diets.add(diet);
+        diet.setDietMemo(this);
+    }
 }
+

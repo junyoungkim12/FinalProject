@@ -32,6 +32,7 @@ public class Diet {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memo_id")
     private DietMemo dietMemo;
@@ -85,5 +86,6 @@ public class Diet {
             this.totalGram = 0.0f;
         }
     }
+
 }
 
