@@ -18,13 +18,19 @@ public class BasicTrainingController {
 
     private final BasicTrainingService basicTrainingService;
 
-
+    /**
+     * 기본 운동 등록 API
+     */
     @PostMapping
     public ResponseEntity<TrainingDto> addBasicTraining(@RequestBody AddTrainingRequest input) {
+        log.info("기본 운동 등록 요청: {}", input);
         TrainingDto result = basicTrainingService.addBasicTraining(input);
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 전체 기본 운동 목록 조회 API
+     */
     @GetMapping
     public ResponseEntity<List<TrainingDto>> getAllTrainings() {
         List<TrainingDto> trainings = basicTrainingService.getAllTrainings();

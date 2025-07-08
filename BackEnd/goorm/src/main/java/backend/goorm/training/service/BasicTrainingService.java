@@ -9,6 +9,10 @@ import backend.goorm.training.repository.TrainingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -38,5 +42,12 @@ public class BasicTrainingService {
         Training saved = trainingRepository.save(training);
         log.info("기본 운동 등록 완료: {}", saved.getTrainingName());
         return TrainingDto.fromEntity(saved);
+    }
+    @Transactional(readOnly = true)
+    public List<TrainingDto> getAllTrainings() {
+        List<Training> trainings = trainingRepository.findAll();
+        return trainings.stream()
+                .map(TrainingDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }
