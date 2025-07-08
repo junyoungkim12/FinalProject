@@ -1,49 +1,51 @@
 package backend.goorm.record.dto;
 
 import backend.goorm.record.entity.Record;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
+@Builder
 public class RecordDto {
-    private Long recordId;
-    private Float caloriesBurned;
-    private Integer durationMinutes;
-    private String intensity;
-    private Integer sets;
-    private Integer reps;
-    private Integer weight;
-    private Float distance;
-    private String memo;
-    private Integer satisfaction;
-    private String trainingName;
-    private LocalDate exerciseDate;
-    private String categoryName;
-    private LocalDateTime modifiedDate;
-    private Float totalCaloriesBurned;
+    private final Long recordId;
+    private final Float caloriesBurned;
+    private final Integer durationMinutes;
+    private final String intensity;
+    private final Integer sets;
+    private final Integer reps;
+    private final Integer weight;
+    private final Float distance;
+    private final String memo;
+    private final Integer satisfaction;
+    private final String trainingName;
+    private final LocalDate exerciseDate;
+    private final String categoryName;
+    private final LocalDateTime modifiedDate;
+    private final Float totalCaloriesBurned;
 
     public static RecordDto fromEntity(Record record, String memo, Float totalCaloriesBurned) {
-        RecordDto dto = new RecordDto();
-        dto.setRecordId(record.getRecordId());
-        dto.setCaloriesBurned(record.getCaloriesBurned());
-        dto.setDurationMinutes(record.getDurationMinutes());
-        dto.setIntensity(record.getIntensity());
-        dto.setSets(record.getSets());
-        dto.setReps(record.getReps());
-        dto.setWeight(record.getWeight());
-        dto.setDistance(record.getDistance());
-        dto.setMemo(memo); // Set memo content
-        dto.setSatisfaction(record.getSatisfaction());
-        dto.setTrainingName(record.getTraining().getTrainingName());
-        dto.setExerciseDate(record.getExerciseDate());
-        dto.setCategoryName(String.valueOf(record.getTraining().getCategory().getCategoryName())); // Correctly retrieve category name
-        dto.setModifiedDate(record.getModifiedDate());
-        dto.setTotalCaloriesBurned(totalCaloriesBurned);
-        return dto;
+        return RecordDto.builder()
+                .recordId(record.getRecordId())
+                .caloriesBurned(record.getCaloriesBurned())
+                .durationMinutes(record.getDurationMinutes())
+                .intensity(record.getIntensity())
+                .sets(record.getSets())
+                .reps(record.getReps())
+                .weight(record.getWeight())
+                .distance(record.getDistance())
+                .memo(memo)
+                .satisfaction(record.getSatisfaction())
+                .trainingName(record.getTraining() != null ? record.getTraining().getTrainingName() : null)
+                .exerciseDate(record.getExerciseDate())
+                .categoryName(record.getTraining() != null && record.getTraining().getCategory() != null
+                        ? String.valueOf(record.getTraining().getCategory().getCategoryName())
+                        : null)
+                .modifiedDate(record.getModifiedDate())
+                .totalCaloriesBurned(totalCaloriesBurned)
+                .build();
     }
 
     public static RecordDto fromEntity(Record record, String memo) {
@@ -54,3 +56,6 @@ public class RecordDto {
         return fromEntity(record, null, null);
     }
 }
+
+
+
