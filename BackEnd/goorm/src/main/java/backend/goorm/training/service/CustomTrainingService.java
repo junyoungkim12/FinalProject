@@ -26,61 +26,77 @@ public class CustomTrainingService {
     private final TrainingRepository trainingRepository;
     private final TrainingCategoryRepository trainingCategoryRepository;
 
-    public TrainingDto addCustomTraining(AddTrainingRequest input, Member member) {
-        TrainingCategory category = input.getCategory();
-        if (category == null) {
-            throw new IllegalArgumentException("카테고리가 제공되지 않았습니다.");
-        }
+    // 커스텀 운동 등록
+    public TrainingDto addCustomTraining(AddTrainingRequest request, Member member) {
+        // 1. 카테고리 ID로만 검증 (category 객체 대신)
+        Long categoryId = request.getCategoryId();
+        TrainingCategory category = trainingCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> {
+                    log.warn("카테고리 ID({})가 존재하지 않음", categoryId);
+                    return new IllegalArgumentException("카테고리 ID가 존재하지 않습니다.");
+                });
 
-        TrainingCategory actualCategory = trainingCategoryRepository.findById(category.getCategoryId())
+        // 2. Builder 패턴 활용하여 Training 생성 (setter 사용 X)
+        Training training = Training.builder()
+                .trainingName(request.getName())
+                .category(category)
+                .member(member)
+                .userCustom(true)
+                .build();
+
+        Training saved = trainingRepository.save(training);
+        log.info("커스텀 운동 등록 완료: memberId={}, trainingId={}", member.getMemberId(), saved.getTrainingId());
+        return TrainingDto.fromEntity(saved);
+    }
+
+    // 커스텀 운동 수정
+    public TrainingDto editCustomTraining(EditTrainingRequest request, Member member) {
+        Training training = trainingRepository.findById(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Training not found with id: " + request.getId()));
+
+        // 사용자 소유 확인
+        validateMemberOwnership(training, member);
+
+        // 카테고리 수정도 ID로만
+        Long categoryId = request.getCategoryId();
+        TrainingCategory category = trainingCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("카테고리 ID가 존재하지 않습니다."));
 
-        if (!actualCategory.getCategoryName().equals(category.getCategoryName())) {
-            throw new IllegalArgumentException("카테고리 ID와 이름이 일치하지 않습니다.");
-        }
-
-        Training training = AddTrainingRequest.toEntity(input, actualCategory);
-        training.setMember(member);
+        // Setter 대신 Builder/Copy를 권장, 하지만 JPA에서는 실무적으로 Setter도 필요할 수 있음
+        training.updateTraining(request.getTrainingName(), category);
         Training saved = trainingRepository.save(training);
+        log.info("커스텀 운동 수정 완료: memberId={}, trainingId={}", member.getMemberId(), saved.getTrainingId());
         return TrainingDto.fromEntity(saved);
     }
 
-    public TrainingDto editCustomTraining(EditTrainingRequest input, Member member) {
-
-        Training training = trainingRepository.findById(input.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Training not found with id: " + input.getId()));
-
-
-        if (!training.getMember().getMemberId().equals(member.getMemberId())) {
-            throw new IllegalArgumentException("이 훈련은 현재 사용자와 관련이 없습니다.");
-        }
-
-        training.setTrainingName(input.getTrainingName());
-        training.setCategory(input.getCategory());
-        Training saved = trainingRepository.save(training);
-        return TrainingDto.fromEntity(saved);
-    }
-
+    // 운동 삭제
     public TrainingDto deleteCustomTraining(Long trainingId, Member member) {
-
         Training training = trainingRepository.findById(trainingId)
                 .orElseThrow(() -> new IllegalArgumentException("Training not found with id: " + trainingId));
 
-        if (!training.getMember().getMemberId().equals(member.getMemberId())) {
-            throw new IllegalArgumentException("이 훈련은 현재 사용자와 관련이 없습니다.");
-        }
-
+        validateMemberOwnership(training, member);
 
         if (Boolean.TRUE.equals(training.getUserCustom())) {
             trainingRepository.delete(training);
+            log.info("커스텀 운동 삭제 완료: memberId={}, trainingId={}", member.getMemberId(), trainingId);
             return TrainingDto.fromEntity(training);
-        } else {
-            throw new IllegalArgumentException("기본 운동은 삭제할 수 없습니다.");
         }
+        throw new IllegalArgumentException("기본 운동은 삭제할 수 없습니다.");
     }
 
+    // 회원별 커스텀 운동 목록
     public List<TrainingDto> customTrainingList(Member member) {
-        List<Training> list = trainingRepository.findByMember_MemberId(member.getMemberId());
-        return list.stream().map(TrainingDto::fromEntity).collect(Collectors.toList());
+        return trainingRepository.findByMember_MemberId(member.getMemberId())
+                .stream()
+                .map(TrainingDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    // 소유자 확인 메서드 분리
+    private void validateMemberOwnership(Training training, Member member) {
+        if (!training.getMember().getMemberId().equals(member.getMemberId())) {
+            log.warn("본인이 만든 커스텀 운동이 아닙니다: 요청 memberId={}, 실제 memberId={}", member.getMemberId(), training.getMember().getMemberId());
+            throw new IllegalArgumentException("이 훈련은 현재 사용자와 관련이 없습니다.");
+        }
     }
 }
