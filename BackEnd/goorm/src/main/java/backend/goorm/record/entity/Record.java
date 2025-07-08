@@ -23,6 +23,7 @@ public class Record {
     @JoinColumn(name = "training_id", nullable = false)
     private Training training;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;

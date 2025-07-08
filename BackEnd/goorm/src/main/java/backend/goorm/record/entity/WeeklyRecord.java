@@ -24,18 +24,29 @@ public class WeeklyRecord {
 
     private int trainingPerWeek;
 
+    @Setter
     private LocalDate startDate;
+    @Setter
     private LocalDate endDate;
 
     // 주간 body part count 기록
+    @Setter
     private double cardio;
+    @Setter
     private double chest;
+    @Setter
     private double back;
+    @Setter
     private double legs;
+    @Setter
     private double shoulder;
+    @Setter
     private double biceps;
+    @Setter
     private double triceps;
+    @Setter
     private double abs;
+    @Setter
     private double etc;
 
     /**

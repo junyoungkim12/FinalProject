@@ -20,16 +20,20 @@ public class Memo {
     @Column(name = "memo_id")
     private Long memoId;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Setter
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
+    @Setter
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Setter
     @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Record> records = new ArrayList<>();
 
